@@ -1,0 +1,46 @@
+#!/usr/bin/python
+'''
+@author: You Qiang
+'''
+import requests
+from lxml import html
+class UrlGetter(object):
+    @staticmethod
+    def extract_urls(url):
+#        content = urllib2.urlopen(url).read()
+        content = requests.get(url).content
+        tree = html.document_fromstring(content)
+        target_tree = tree.xpath("//a/@href") # usage of xpath should remember
+        return target_tree
+    
+    @staticmethod
+    def filter(urls, startswith='ed2k:'):
+        us = []
+        for url in urls:
+            if url.startswith(startswith):
+                us.append(url)
+        return us
+    
+def test():
+    urls = UrlGetter.extract_urls('http://www.ed2kfile.com/485572')
+    us =  UrlGetter.filter(urls, startswith='ed2k'+':')
+    for u in us:
+        print u
+
+def main(args):
+    if len(args) < 2:
+        print "Usage: python UrlParser.py URL [ed2k|magnet|thunder]]"
+        print "\tURL: the url of the page where reources are in"
+        return
+    urls = UrlGetter.extract_urls(args[1])
+    if len(args) > 2:
+        startswith=args[2]
+    else:
+        startswith="ed2k"
+    us =  UrlGetter.filter(urls, startswith=startswith+':')
+    for u in us:
+        print u
+        
+import sys
+if __name__ == '__main__':
+    main(sys.argv)
